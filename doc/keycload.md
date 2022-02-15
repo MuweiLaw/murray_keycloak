@@ -1,7 +1,7 @@
 
 #  一、特点
 
-keycload 为现代应用和分布式服务提供了一套完整的认证授权管理解决方案。它是开源的，是一个独立的认证授权服务器
+keycloak 为现代应用和分布式服务提供了一套完整的认证授权管理解决方案。它是开源的，是一个独立的认证授权服务器
 
    - 独立的认证授权服务器，提供完整的认证解决方案
    - 基于OpenId-connect &SAML协议
@@ -38,10 +38,81 @@ keycload 为现代应用和分布式服务提供了一套完整的认证授权�
    
    ```
 
-   
+#  三、keycloak控制台配置
 
-# 三、后端配置
-## pom依赖项
+**版本为16.1.1**
+
+压缩包解压后，双击 bin => standalone.bat  启动不要关闭窗口
+
+访问[http://localhost:8080](http://www.javashuo.com/link?url=http://localhost:8080/auth/) 并点击Administration Console进行登陆，第一次进入需要创建账号密码
+
+## 1、建立Realm
+
+![image-20220215181826793](.\img\image-20220215181826793.png)
+
+![image-20220215182236775](.\img\image-20220215182236775.png)
+
+## 2、建立客户端
+
+![image-20220215182716268](.\img\image-20220215182716268.png)
+
+### ①建立前端应用客户端 auth_web，Access Type选择public
+
+记住客户端名称需要填写到前端项目main.js中
+
+![image-20220215183453445](.\img\image-20220215183453445.png)
+
+创建后内容
+
+![image-20220215183744519](.\img\image-20220215183744519.png)
+
+更改前端项目端口
+
+![image-20220215183205615](.\img\image-20220215183205615.png)
+
+### ②建立后端应用客户端
+
+建立一个新的客户端：auth，Access Type选择bearer-only
+
+![image-20220215184738451](.\img\image-20220215184738451.png)
+
+![image-20220215185146610](.\img\image-20220215185146610.png)
+
+点击第①布，生成第二步中的字符串，后端配置文件中的keycloak.credentials.secret填写第②步中生成的字符串
+
+![image-20220215193622468](.\img\image-20220215193622468.png)
+
+## 3、建立角色
+
+建立2个角色：ROLE_ADMIN、ROLE_CUSTOMER
+
+![image-20220215194224113](.\img\image-20220215194224113.png)
+
+![image-20220215194300818](.\img\image-20220215194300818.png)
+
+## 4、建立用户
+
+建立2个用户：admin、customer
+
+![image-20220215194440200](.\img\image-20220215194440200.png)![image-20220215194509443](.\img\image-20220215194509443.png)
+
+设置用户密码
+
+![image-20220215194904549](.\img\image-20220215194904549.png)
+
+查看刚才新增的两个用户![image-20220215194732344](.\img\image-20220215194732344.png)
+
+## 5、分配角色
+
+admin用户分配角色ROLE_ADMIN，customer用户分配角色ROLE_CUSTOMER
+
+![image-20220215195118901](.\img\image-20220215195118901.png)![image-20220215195225322](.\img\image-20220215195225322.png)
+
+# 四、后端配置
+
+*文档j结尾有完整Demo*
+
+## 1、pom依赖项
    ``` xml
    <dependency>
             <groupId>org.keycloak</groupId>
@@ -50,7 +121,7 @@ keycload 为现代应用和分布式服务提供了一套完整的认证授权�
    </dependency> 
    
    ```
-## 适配器BOM依赖项
+## 2、适配器BOM依赖项
    ``` xml
 <dependencyManagement>
   <dependencies>
@@ -64,7 +135,7 @@ keycload 为现代应用和分布式服务提供了一套完整的认证授权�
   </dependencies>
 </dependencyManagement>
    ```
-## yaml
+## 3、yaml说明
 
 ```yaml
 keycloak:
@@ -99,10 +170,10 @@ keycloak:
 
 
 
-## User Storage SPI
+## 4、User Storage SPI
    如果你不想所有的用户数据都存储在keycloak的数据库中，你想要用户的部分数据存储在你自己的数据库。Keycloak提供联合存储来解决这种情景，通过实现User Storage SPI接口，可以做到将部分用户数据存储到你自己的数据库中，而另一部分用户数据存储在keycloak的数据库中。
 
-### UserStorageProvider简介
+### ①UserStorageProvider简介
 
 | SPI 接口                 | 实现功能                                                    |
 | ------------------------ | ----------------------------------------------------------- |
@@ -113,7 +184,7 @@ keycloak:
 | CredentialInputValidator | 验证密码的逻辑                                              |
 | UserQueryProvider        | 从自己数据库中查询用户                                      |
 
-### pom依赖
+### ②pom依赖
 
 ```xml
 <dependency>
@@ -134,9 +205,236 @@ keycloak:
          <version>${keycloak.version}</version>
          <scope>provided</scope>
      </dependency>
+```
+
+## 5、Java Admin API
+
+Keycloak提供 Rest API 用于管理keycloak几乎所有的用户认证授权数据对象，如创建用户、查询用户、创建角色、查询会话等的API.Keycloak Rest API；另外，Keycloak将这些Rest Api封装成了一个java库，你只要提供keycloak服务器连接信息，就可以直接调用java api 去操作keycloak数据对象了。
+
+### ①核心代码
+
+getInstance()方法直接操作对象即可
+
+```java
+package com.example;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+
+public class KeycloakHelper {
+    private static Keycloak keycloak;
+
+    public static Keycloak getInstance() {
+        if (keycloak == null) {
+            synchronized (KeycloakHelper.class) {
+                keycloak = initialKeycloakClient();
+            }
+        }
+        return keycloak;
+    }
+
+    private static Keycloak initialKeycloakClient() {
+        return KeycloakBuilder.builder()
+                .serverUrl("http://localhost:8080/auth")
+                .realm("master")
+                .username("admin")
+                .password("admin")
+                .clientId("admin-cli")
+                .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
+                .build();
+    }
+}
+```
+
+### ②pom依赖
+
+```xml
+		<dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>16.1.1</version>
+        </dependency>
+```
+
+## 6、接入Spring Security Adapter参考
+
+[https://felord.cn/intro-to-keycloak.html](https://felord.cn/intro-to-keycloak.html)
+
+# 五、前端配置
+
+*文档结尾有完整Demo*
+
+## 1、核心代码
+
+package.json引入依赖
+
+```json
+"dependencies": {
+    "vue": "^2.6.11",
+    "element-ui": "^2.15.5",
+    "vue-router": "^3.2.0",
+    "axios": "^0.19.2",
+    "core-js": "^3.6.4",
+    "keycloak-js": "^16.1.1"
+  },
+```
+
+main.js
+
+```js
+
+import Vue from 'vue'
+import App from './App'
+import router from './router'
+import ElementUI from 'element-ui'
+import axios from 'axios'
+import Keycloak from 'keycloak-js'
+
+import 'element-ui/lib/theme-chalk/index.css'
+
+Vue.prototype.$axios = axios
+
+Vue.config.productionTip = false
+
+Vue.use(ElementUI)
+
+// keycloak init options 
+const initOptions = {
+  url: 'http://127.0.0.1:8080/auth/',
+  realm: 'demo',
+  clientId: 'auth_web',
+  onLoad: 'login-required'
+}
+
+const keycloak = Keycloak(initOptions)
+
+keycloak.init({ onLoad: initOptions.onLoad, promiseType: 'native' }).then((authenticated) => {
+  if (!authenticated) {
+    window.location.reload()
+  } else {
+    Vue.prototype.$keycloak = keycloak
+    console.log('Authenticated')
+  }
+  new Vue({
+    el: '#app',
+    router,
+    components: { App },
+    template: '<App/>',
+    render: h => h(App)
+  }).$mount('#app')
+
+  setInterval(() => {
+    keycloak.updateToken(70).then((refreshed) => {
+      if (refreshed) {
+        console.log('Token refreshed')
+      } else {
+        console.log('Token not refreshed, valid for ' + Math.round(keycloak.tokenParsed.exp + keycloak.timeSkew - new Date().getTime() / 1000) + ' seconds')
+      }
+    }).catch(error => {
+      console.log('Failed to refresh token', error)
+    })
+  }, 60000)
+}).catch(error => {
+  console.log('Authenticated Failed', error)
+})
 
 ```
 
-# # 五、demo地址(包含前后端)
+vue组件
+
+```html
+<template>
+  <div class="hello">
+    <el-button @click="getAdmin">调用admin</el-button>
+    <h1>{{ msg }}</h1>
+    <div>
+      <p>
+        current user: {{user}}
+      </p>
+      <p>
+        roles: {{roles}}
+      </p>
+      <p>
+        {{adminMsg}}
+      </p>
+      <p>
+        {{customerMsg}}
+      </p>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+
+export default {
+  name: 'Hello',
+  props: {
+    msg: String
+  },
+  data () {
+    return {
+      user: '',
+      roles: [],
+      adminMsg: '',
+      customerMsg: ''
+    }
+  },
+  created () {
+    this.user = this.$keycloak.idTokenParsed.preferred_username
+    this.roles = this.$keycloak.realmAccess.roles
+
+    this.getAdmin()
+      .then(response => {
+        this.adminMsg = response.data
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  },
+  methods: {
+    getAdmin () {
+      return axios({
+        method: 'get',
+        url: 'http://127.0.0.1:8889/admin',
+        headers: {'Authorization': 'Bearer ' + this.$keycloak.token}
+      })
+    }
+  }
+}
+</script>
+```
+
+## 2、启动项目
+
+```sh
+# 打包编译
+cnpm install
+# 启动开发环境
+npm run dev
+```
+
+## 3、访问
+
+访问[http://localhost:8888](http://localhost:8888)
+
+因为没有登录，故跳转到keycloak的用户登录页
+
+![image-20220215195621273](.\img\image-20220215195621273.png)
+
+接着输入刚才步骤 **三 - 4** 中创建用户的账密
+
+第一次登录会要求修改密码
+
+![image-20220215200222832](.\img\image-20220215200222832.png)
+
+登录成功![image-20220215200351188](.\img\image-20220215200351188.png)
+
+![image-20220215200527279](.\img\image-20220215200527279.png)
+
+大功告成
+
+# 六、Demo地址
 
 [https://gitee.com/murraylaw/murray_keycloak](https://gitee.com/murraylaw/murray_keycloak.git)

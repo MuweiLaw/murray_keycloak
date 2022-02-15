@@ -23,7 +23,7 @@
 import axios from 'axios'
 
 export default {
-  name: 'HelloWorld',
+  name: 'Hello',
   props: {
     msg: String
   },
@@ -46,14 +46,6 @@ export default {
       .catch(error => {
         console.log(error)
       })
-
-    // this.getCustomer()
-    //   .then(response => {
-    //     this.customerMsg = response.data
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //   })
   },
   methods: {
     getAdmin () {
@@ -63,13 +55,6 @@ export default {
         headers: {'Authorization': 'Bearer ' + this.$keycloak.token}
       })
     }
-    // getCustomer () {
-    //   return axios({
-    //     method: 'get',
-    //     url: 'http://127.0.0.1:8082/customer',
-    //     headers: {'Authorization': 'Bearer ' + this.$keycloak.token}
-    //   })
-    // }
   }
 }
 </script>

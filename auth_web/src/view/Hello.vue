@@ -59,7 +59,7 @@ export default {
     getAdmin () {
       return axios({
         method: 'get',
-        url: 'http://127.0.0.1:8082/admin',
+        url: 'http://127.0.0.1:8889/admin',
         headers: {'Authorization': 'Bearer ' + this.$keycloak.token}
       })
     }

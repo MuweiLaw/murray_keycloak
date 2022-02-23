@@ -1,0 +1,15 @@
+server:
+  port: 8890
+
+keycloak:
+  realm: demo                                     #领域的名称， 这是必需的
+  auth-server-url: http://127.0.0.1:8080/auth     #Keycloak服务器的基本URL。 所有其他Keycloak页面和REST服务端点都从此派生。 通常采用https：// host：port / auth的形式。 这是必需的
+  resource: auth                                  #应用程序的client-id，每个应用程序都有一个用于标识该应用程序的client-id。 这是必需的。
+  ssl-required: external                          #确保与Keycloak服务器之间的所有通信均通过HTTPS。 在生产中，这应该设置为全部。 这是可选的。 默认值为外部，这意味着外部请求默认情况下需要HTTPS。 有效值为“全部”，“外部”和“无”。
+  confidential-port: 8443                         #Keycloak服务器用于通过SSL / TLS进行安全连接的机密端口。 这是可选的。 默认值为8443。
+  credentials:
+    secret: M90d3Iqm86BKJAHMf9Lo9xMB7oaPiIja      #上文添加客户端后Credentials Tab内对应的内容
+  public-client: false                            #如果设置为true，则适配器不会将客户端的凭据发送到Keycloak。 这是可选的。 默认值为false。
+  bearer-only: true                               #设置为true，表示此应用的Keycloak访问类型是bearer-only
+  use-resource-role-mappings: false               #如果设置为true，则适配器将在令牌内部查找用户的应用程序级角色映射。 如果为false，它将查看用户角色映射的领域级别。 这是可选的。 默认值为false
+  cors: true                                      #设置为true表示容许跨域访问

@@ -1,5 +1,6 @@
-
 #  一、特点
+
+## 1、简介
 
 keycloak 为现代应用和分布式服务提供了一套完整的认证授权管理解决方案。它是开源的，是一个独立的认证授权服务器
 
@@ -9,6 +10,17 @@ keycloak 为现代应用和分布式服务提供了一套完整的认证授权�
    - 具有独立的数据库，用于储存用户认证授权凭据
    - 支持联合数据库存储，比如集成Ldap服务器，提供SPL扩展
    - 提供管理API，用于管理keycloak所有的认证授权对象
+
+## 2、OIDC
+
+掌握Keycloak就必须对 OpenID Connect（**OIDC**）协议进行了解。**OIDC** 是 **OAuth 2.0** 的一个扩展协议
+
+资料参考：[https://felord.cn/about-oidc.html](https://felord.cn/about-oidc.html)
+
+
+## 3、Demo地址
+
+[https://gitee.com/murraylaw/murray_keycloak](https://gitee.com/murraylaw/murray_keycloak.git)
 
 # 二、使用流程
 
@@ -44,7 +56,7 @@ keycloak 为现代应用和分布式服务提供了一套完整的认证授权�
 
 压缩包解压后，双击 bin => standalone.bat  启动不要关闭窗口
 
-访问[http://localhost:8080](http://www.javashuo.com/link?url=http://localhost:8080/auth/) 并点击Administration Console进行登陆，第一次进入需要创建账号密码
+访问[http://localhost:8080](http://localhost:8080) 并点击Administration Console进行登陆，第一次进入需要创建账号密码
 
 ## 1、建立Realm
 
@@ -109,8 +121,6 @@ admin用户分配角色ROLE_ADMIN，customer用户分配角色ROLE_CUSTOMER
 ![image-20220215195118901](.\img\image-20220215195118901.png)![image-20220215195225322](.\img\image-20220215195225322.png)
 
 # 四、后端配置
-
-*文档j结尾有完整Demo*
 
 ## 1、pom依赖项
    ``` xml
@@ -257,13 +267,7 @@ public class KeycloakHelper {
         </dependency>
 ```
 
-## 6、接入Spring Security Adapter参考
-
-[https://felord.cn/intro-to-keycloak.html](https://felord.cn/intro-to-keycloak.html)
-
 # 五、前端配置
-
-*文档结尾有完整Demo*
 
 ## 1、核心代码
 
@@ -435,6 +439,6 @@ npm run dev
 
 大功告成
 
-# 六、Demo地址
+# 六、接入Spring Security Adapter
 
-[https://gitee.com/murraylaw/murray_keycloak](https://gitee.com/murraylaw/murray_keycloak.git)
+资料参考: [https://felord.cn/categories/spring-security/keycloak/](https://felord.cn/categories/spring-security/keycloak/)
